@@ -5,6 +5,10 @@ from fontTools.ttLib import TTFont
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
+LATIN_FONT = FIXTURES / "OpenSans-Regular.ttf"
+GREEK_CAPITALS = [cp for cp in range(0x0391, 0x03AA) if cp != 0x03A2]
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
 # filename -> (family, style), as stored in each font's name table
 EXPECTED_NAMES = {
     "Roboto-Italic.ttf": ("Roboto", "Italic"),
