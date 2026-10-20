@@ -7,6 +7,8 @@ from fontTools.ttLib import TTLibError
 from app.services.font_loader import load_font, InvalidFontError
 from app.services.metadata import extract_metadata
 from app.services.preview import render_preview
+from app.services.subset import extract_subset, unsupported_characters, \
+    to_unicode
 from app.utils import read_upload
 
 router = APIRouter()
@@ -38,10 +40,32 @@ def preview(file: UploadFile, size: int = Query(48, ge=12, le=128)) -> Response:
     return Response(content=png, media_type="image/png")
 
 
-# @router.post("/subset")
-# def subset():
-#     return {}
-#
+@router.post("/subset")
+def subset(file: UploadFile, text: str = Query(min_length=1, max_length=64)) -> Response:
+    data = read_upload(file)
+    try:
+        font = load_font(io.BytesIO(data))
+    except InvalidFontError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+    try:
+        unsupported = unsupported_characters(text, font)
+        if len(unsupported) == len(text):
+            raise HTTPException(status_code=422,
+                                detail="The font does not support any of the requested characters.")
+
+        subset_ttf = extract_subset(text, font)
+        headers = {"Content-Disposition": 'attachment; filename="subset.ttf"'}
+        if unsupported:
+            headers["Unsupported-Characters"] = to_unicode(unsupported)
+    except (ValueError, OSError, TTLibError, struct.error, KeyError, IndexError) as err:
+        raise HTTPException(status_code=422,
+                            detail="Could not create a subset for this font.") from err
+    return Response(
+        content=subset_ttf,
+        media_type="font/ttf",
+        headers=headers,
+    )
+
 
 # @router.post("/render")
 # def render():
