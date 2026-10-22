@@ -9,7 +9,9 @@ from app.services.metadata import extract_metadata
 from app.services.preview import render_preview
 from app.services.subset import extract_subset, unsupported_characters, \
     to_unicode
+from app.services.render import render_text
 from app.utils import read_upload
+from app.config import MAX_RENDER_IMAGE_WIDTH, DEFAULT_FONT_SIZE
 
 router = APIRouter()
 
@@ -67,6 +69,21 @@ def subset(file: UploadFile, text: str = Query(min_length=1, max_length=64)) -> 
     )
 
 
-# @router.post("/render")
-# def render():
-#     return {}
+@router.post("/render")
+def render(
+        file: UploadFile,
+        text: str = Query(min_length=1, max_length=1000),
+        image_width: int = Query(800, ge=200, le=MAX_RENDER_IMAGE_WIDTH),
+        font_size: int = Query(DEFAULT_FONT_SIZE, ge=8, le=100),
+        font_color: str = Query("#000000", pattern=r"^#[0-9a-fA-F]{6}$"),
+):
+    data = read_upload(file)
+    try:
+        font = load_font(io.BytesIO(data))
+        png = render_text(data, image_width, font_size, text, font_color)
+    except InvalidFontError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+
+
+    return Response(content=png, media_type="image/png")
