@@ -30,7 +30,11 @@ def pick_characters(font: TTFont, limit: int = MAX_PREVIEW_GLYPHS) -> list[int]:
     return other_set[:limit]
 
 
-def render_preview(font_bytes: bytes, font: TTFont, size: int = 48, cols: int = 8) -> bytes:
+def render_preview(
+        font_bytes: bytes,
+        font: TTFont,
+        size: int = 48, cols: int = 8
+) -> bytes:
     characters = pick_characters(font)
     if not characters:
         raise ValueError("Font has no drawable characters")

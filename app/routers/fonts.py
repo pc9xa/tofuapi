@@ -7,10 +7,9 @@ from fontTools.ttLib import TTLibError
 from app.services.font_loader import load_font, InvalidFontError
 from app.services.metadata import extract_metadata
 from app.services.preview import render_preview
-from app.services.subset import extract_subset, unsupported_characters, \
-    to_unicode
-from app.services.render import render_text
-from app.utils import read_upload
+from app.services.subset import extract_subset, to_unicode
+from app.services.render import render_text, RenderedImageTooLargeError
+from app.utils import read_upload, unsupported_characters
 from app.config import MAX_RENDER_IMAGE_WIDTH, DEFAULT_FONT_SIZE
 
 router = APIRouter()
@@ -80,10 +79,16 @@ def render(
     data = read_upload(file)
     try:
         font = load_font(io.BytesIO(data))
+        unsupported = unsupported_characters(text, font)
+        if len(unsupported) == len(text):
+            raise HTTPException(status_code=422,
+                                detail="The font does not support any of the requested characters")
         png = render_text(data, image_width, font_size, text, font_color)
     except InvalidFontError as err:
         raise HTTPException(status_code=400, detail=str(err))
-
-
+    except RenderedImageTooLargeError as err:
+        raise HTTPException(status_code=422, detail=str(err))
+    except (OSError, TTLibError, struct.error, KeyError, IndexError) as err:
+        raise HTTPException(status_code=422, detail=str("Could not render text for this font."))
 
     return Response(content=png, media_type="image/png")
