@@ -4,7 +4,12 @@ A small web API for inspecting, previewing, subsetting, and rendering text with 
 
 The name comes from "tofu", the nickname for the empty boxes (□) shown when a font has no glyph for a character.
 
-<!-- TODO: add a screenshot or sample output, e.g. docs/images/render-example.png -->
+
+<img width="1181" height="398" alt="image" src="https://github.com/user-attachments/assets/d7277b82-265e-4198-9a46-b674b2b6edaa" />
+
+
+
+
 
 ## Features
 
