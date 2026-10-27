@@ -27,7 +27,7 @@ Uploaded fonts are processed in memory and are not stored by the app.
 **Requirements:** Python 3.14 or newer, and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/pc9xa/tofuapi
 cd TofuAPI
 uv sync
 uv run fastapi dev app/main.py
@@ -208,4 +208,4 @@ The tests cover the service functions directly and the endpoints through FastAPI
 
 ## License
 
-<!-- TODO: choose a license for this project and add a LICENSE file -->
+MIT License
