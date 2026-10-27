@@ -5,6 +5,17 @@ from fontTools.ttLib import TTFont
 from tests.helpers import FIXTURES, GREEK_CAPITALS, LATIN_FONT
 
 # Open Source Fonts ------------------------------------------------------------
+"""
+Roboto
+https://fonts.google.com/specimen/Roboto
+
+Source Code Pro
+https://fonts.google.com/specimen/Source+Code+Pro
+
+Open Sans
+https://fonts.google.com/specimen/Open+Sans
+"""
+
 
 @pytest.fixture
 def roboto_italic() -> TTFont:
@@ -28,7 +39,10 @@ def open_sans() -> TTFont:
 
 
 # Proprietary Fonts ------------------------------------------------------------
-
+"""
+Courier New
+https://fonts.adobe.com/fonts/courier-new
+"""
 @pytest.fixture
 def courier_new() -> TTFont:
     return TTFont(FIXTURES / "cour.ttf")

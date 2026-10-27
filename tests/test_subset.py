@@ -7,7 +7,8 @@ from fontTools.ttLib import TTFont
 from app.config import MAX_UPLOAD_BYTES
 from app.main import app
 from app.services.metadata import extract_metadata
-from app.services.subset import extract_subset, unsupported_characters, to_unicode
+from app.services.subset import extract_subset, format_codepoints
+from app.services.utils import unsupported_characters
 from tests.helpers import (
     EXPECTED_NAMES,
     FIXTURES,
@@ -269,7 +270,7 @@ def test_unsupported_all_missing_in_order(open_sans):
 # Each character is reported once, in the order it first appears.
 def test_unsupported_lists_each_character_once_in_first_seen_order(open_sans):
     result = unsupported_characters("本a日本日a", open_sans)
-    assert to_unicode(result) == "U+672C,U+65E5"
+    assert format_codepoints(result) == "U+672C,U+65E5"
 
 # Empty text has nothing to report.
 def test_unsupported_empty_text(open_sans):
@@ -305,8 +306,8 @@ def test_unsupported_does_not_modify_the_font(open_sans):
     ],
     ids=["one", "two", "padded-to-four-digits", "beyond-bmp", "empty"],
 )
-def test_to_unicode(characters, expected):
-    assert to_unicode(characters) == expected
+def test_format_codepoints(characters, expected):
+    assert format_codepoints(characters) == expected
 
 
 # ---------------------------------------------------------------------------

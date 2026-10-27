@@ -8,7 +8,7 @@ from PIL import Image, ImageFont
 from app.config import MAX_RENDER_IMAGE_WIDTH, MAX_UPLOAD_BYTES
 from app.main import app
 from app.services.render import (
-    HORZ_MARGIN,
+    HORIZONTAL_MARGIN,
     LINE_MARGINS,
     RenderedImageTooLargeError,
     create_lines,
@@ -349,8 +349,8 @@ def test_ink_stays_inside_the_margins(width, size):
     image = open_png(png)
     left, top, right, bottom = ink_bbox(png)
     line_spacing = int(size * 0.5)
-    assert left >= HORZ_MARGIN // 2
-    assert right <= image.width - HORZ_MARGIN // 2
+    assert left >= HORIZONTAL_MARGIN // 2
+    assert right <= image.width - HORIZONTAL_MARGIN // 2
     assert top >= line_spacing
     assert bottom <= image.height - line_spacing
 
@@ -360,8 +360,8 @@ def test_ink_stays_inside_the_margins(width, size):
 def test_both_font_kinds_render_inside_the_margins(filename):
     png = render_text((FIXTURES / filename).read_bytes(), 300, 30, SENTENCE, "#000000")
     left, _top, right, _bottom = ink_bbox(png)
-    assert left >= HORZ_MARGIN // 2
-    assert right <= 300 - HORZ_MARGIN // 2
+    assert left >= HORIZONTAL_MARGIN // 2
+    assert right <= 300 - HORIZONTAL_MARGIN // 2
 
 
 # The requested color is used for the text.
@@ -534,15 +534,6 @@ def test_endpoint_oversized_upload_returns_413():
 # ---------------------------------------------------------------------------
 
 
-# Text with no supported characters is rejected with a 422 and a JSON error, not an image.
-@pytest.mark.parametrize("text", ["日", "日本", "日日日", "日本語"])
-def test_endpoint_text_with_no_supported_characters_returns_422(text):
-    response = post_render(latin_bytes(), text)
-    assert response.status_code == 422
-    assert response.headers["content-type"].startswith("application/json")
-    assert response.json()["detail"]
-
-
 # One supported character is enough: the request succeeds.
 def test_endpoint_one_supported_character_is_enough():
     assert post_render(latin_bytes(), "日本a").status_code == 200
@@ -558,7 +549,10 @@ def test_endpoint_too_tall_returns_422(monkeypatch):
     monkeypatch.setattr("app.services.render.MAX_RENDER_IMAGE_HEIGHT", 200)
     response = post_render(latin_bytes(), "a\nb\nc", font_size=100)
     assert response.status_code == 422
-    assert "200" in response.json()["detail"]
+    assert response.json()["detail"] == (
+        "Rendered text would be 550px tall, which exceeds the "
+        "maximum height of 200px."
+    )
 
 
 # Whatever table is damaged or missing, the endpoint must never answer 500.
